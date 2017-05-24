@@ -41,7 +41,7 @@ byte l_s_b[3] = {10,10,10};
 
 String s_keyboard_name = "RupertM_Keyboard";
 
-int threshold_vals[3][3] = {{200,500,800},{450,700,900},{450,700,900}};
+int threshold_vals[3][3] = {{200,500,800},{450,700,900},{450,700,980}};
 
 float finger_vals[3] = {0.0,0.0,0.0};
 
@@ -53,20 +53,33 @@ byte y_high = 0;
 boolean b_send = false;
 boolean b_zero = true;
 boolean b_receive = false;
-boolean haptic[3] = {false,false,false};
+boolean haptic_1[3] = {false,false,false};
+boolean haptic_2[3] = {false,false,false};
 
 // Send Val
 int i_send;
 
 
 void setup(){
+  //Serial.begin(9600);
+  delay(1000);
+  Serial.begin(115200);
+
   setupKeyboard(s_keyboard_name);
   pinMode(i_pin_vib,OUTPUT);
   pinMode(i_pin_swit, INPUT_PULLUP);
-  Serial.begin(9600);
+
 
 }
 void loop(){
+  /*Serial.print(finger_vals[0]);
+  Serial.print(" ");
+  Serial.print(finger_vals[1]);
+  Serial.print(" ");
+  Serial.print(finger_vals[2]);
+  Serial.print(" ");
+  Serial.println();
+  */
   delay(100);
   byte y_output = get_finger(false);
 //  Serial.print(y_loop);
@@ -75,7 +88,10 @@ void loop(){
   if (y_output == 0 && b_zero == false){ // if current state is zero, and zero is yet to be received, mark zero received
     b_zero = true;
     y_loop = 0;
-    for (int i = 0; i<3;i++) haptic[i] = false;
+    for (int i = 0; i<3;i++){
+      haptic_1[i] = false;
+      haptic_2[i] = false;
+    }
   }
   if (y_output != 0 && b_zero) b_receive = true; //if receiving a character other then zero,
   if (y_loop <12&&b_receive){ //if looped less then 5 times and still receiving a characeter other then 0
@@ -102,6 +118,17 @@ void loop(){
     }
     ble.print("AT+BleKeyboard="); //write character to bluetooth
     ble.println(c_send);
+    //ble.info();
+    //ble.sendCommandCheckOK("AT+BleHIDEn=On");
+    //ble.sendCommandCheckOK("AT+BleKeyboardEn=On");
+    if ( ble.waitForOK() )
+    {
+      Serial.println("OK!");
+    } else
+    {
+      Serial.println("FAILED!");
+    }
+
     if (i_send == 30) delay(500);
 
   }
@@ -129,26 +156,32 @@ void buzz(int _t, int _s, bool _d, int _dl){
 
 }
 byte get_finger(bool _f){
-  bool buzz_loop = false;
+  bool buzz_loop_1 = false;
+  bool buzz_loop_2 = false;
   for (int i = 0; i<3;i++){
     if (l_s_b[i] < 10) l_s_b[i]++;
 
     finger_vals[i] = 0.5*finger_vals[i]+ (0.5*(analogRead(i_pin_f[i])));
 
     if (finger_vals[i] < threshold_vals[i][2] && finger_vals[i] > threshold_vals[i][1]){
+      if (haptic_1[i] == false){
+        buzz_loop_1 = true;
+        haptic_1[i] = true;
+      }
       fin_vals[i] = 1;
       l_s_b[i] = 0;
     } else if (finger_vals[i] < threshold_vals[i][1]){
       fin_vals[i] = 2;
       l_s_b[i] = 0;
-      if (haptic[i] == false){
-         buzz_loop = true;
-         haptic[i] = true;
+      if (haptic_2[i] == false){
+         buzz_loop_2 = true;
+         haptic_2[i] = true;
        }
     } else {
       fin_vals[i] = 0;
     }
-    if (buzz_loop) buzz(15, 255, false, 0);
+    if (buzz_loop_1) buzz(30, 180, false, 10);
+    if (buzz_loop_2) buzz(15, 180, true, 10);
   }
   int val = fin_vals[0]+(fin_vals[1]*3)+(fin_vals[2]*9);
   if (_f){
@@ -157,6 +190,7 @@ byte get_finger(bool _f){
     }
   }
   return val;
+
   delay(50);
 }
 
