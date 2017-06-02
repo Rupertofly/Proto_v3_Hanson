@@ -24,7 +24,7 @@ String c_send = "-";
 
 const char ca_map[27] = {'0','a','b','c','d','e','f','g',
                          'h','i','j','k','l','m','n','o',
-                         'qp','q','r','s','t','u','v','w',
+                         'p','q','r','s','t','u','v','w',
                          'x','y','z'};
 
 
@@ -94,7 +94,7 @@ void loop(){
     }
   }
   if (y_output != 0 && b_zero) b_receive = true; //if receiving a character other then zero,
-  if (y_loop <12&&b_receive){ //if looped less then 5 times and still receiving a characeter other then 0
+  if (y_loop <8&&b_receive){ //if looped less then 5 times and still receiving a characeter other then 0
     if (key_check(y_output)) { //if looped 5 times
       b_send = true; //tell code to send
       i_send = y_high; // tell code what to send
@@ -200,7 +200,7 @@ boolean key_check(byte _y_key){ //check whether current value is higher then pre
       y_high = _y_key;
     }
   }
-  if(y_loop >= 11){
+  if(y_loop >= 7){
     return true;
     //y_loop=0;
   } else {
