@@ -1,4 +1,4 @@
-# include <Arduino.h>
+#include <Arduino.h>
 #include <Adafruit_ATParser.h>
 #include <Adafruit_BLE.h>
 #include <Adafruit_BLEBattery.h>
@@ -9,7 +9,9 @@
 #include <Adafruit_BluefruitLE_UART.h>
 #include "keyboardSetup.h"
 
+void setup();
 
+void loop();
 
 
 
@@ -17,18 +19,118 @@ const int pin_flex_1 = A0;
 const int pin_flex_2 = A1;
 const int pin_flex_3 = A2;
 
+const int pin_button_1 = A3;
+const int pin_button_2 = A4;
+
+const int pin_vib_1 = 5;
+const int pin_vib_2 = 9;
+const int pin_vib_3 = 10;
+
+
+class vibe {
+  int pin;
+  int strength;
+  int reps_left;
+  long c_time;
+  long s_time;
+  long o_time;
+  long e_time;
+  long f_time;
+  bool active;
+  bool between;
+  int reps;
+
+  public:
+
+  vibe(int _pin){
+    pin = _pin;
+    pinMode(pin, OUTPUT);
+    analogWrite(pin,0);
+    s_time = 0L;
+    c_time = millis();
+    active = false;
+    reps = 0;
+    between = false;
+
+  }
+  void buzz(long _length, int _strength, int _repatitions, long rep_legth){
+    if (active == false){
+      s_time = millis();
+      c_time = millis();
+      o_time = _length;
+      strength = _strength;
+      e_time = s_time+o_time;
+      reps = _repatitions;
+      if (_repatitions > 1){
+        f_time = rep_legth;
+        reps_left = reps;
+      }
+      analogWrite(pin,strength);
+      active = true;
+    }
+  }
+  void update(){
+    c_time = millis();
+    if (active){
+      if (c_time > e_time){
+        if (reps_left == 1) reset_buzz();
+        if (reps_left > 1){
+          s_time = e_time+f_time;
+          e_time = s_time+o_time;
+          analogWrite(pin,0);
+          between = true;
+        }
+      }
+      if (between && c_time > s_time){
+        between = false;
+        reps_left--;
+        analogWrite(pin, strength);
+      }
+    }
+  }
+  void reset_buzz(){
+    analogWrite(pin, 0);
+    active = false;
+    s_time = 0L;
+    o_time = 0L;
+    e_time = 0L;
+    f_time = 0L;
+    reps = 0;
+    reps_left = 0;
+    between = false;
+  }
+  bool get_state(){
+    return active;
+  }
+};
 
 
 
 
 
+vibe v1(pin_vib_1);
+vibe v2(pin_vib_2);
+vibe v3(pin_vib_3);
 
+void setup(){
+  Serial.begin(9600);
+}
+void loop(){
+  v1.update();
+  v2.update();
+  v3.update();
+  if(millis()%20000L < 100L) v1.buzz(200,255,3,200);
+  if(millis()%15000L < 100L) v2.buzz(200,255,3,200);
+  if(millis()%10000L < 100L) v3.buzz(200,255,3,200);
+  delay(50);
+  Serial.print(String(v1.get_state()));
+  Serial.print(" ");
+  Serial.print(String(v2.get_state()));
+  Serial.print(" ");
+  Serial.print(String(v3.get_state()));
+  Serial.println(" ");
 
-
-
-
-
-
+}
 
 
 
@@ -110,7 +212,7 @@ void setup(){
 
 }
 void loop(){
-  /*Serial.print(finger_vals[0]);
+Serial.print(finger_vals[0]);
   Serial.print(" ");
   Serial.print(finger_vals[1]);
   Serial.print(" ");
