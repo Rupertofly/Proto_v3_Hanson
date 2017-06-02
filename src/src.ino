@@ -12,6 +12,44 @@
 
 
 
+
+const int pin_flex_1 = A0;
+const int pin_flex_2 = A1;
+const int pin_flex_3 = A2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 const int i_pin_vib = 5;
 const int i_pin_swit = 6;
 const int i_pin_f[3] = {A0,A1,A2};
@@ -80,6 +118,7 @@ void loop(){
   Serial.print(" ");
   Serial.println();
   */
+  /*
   delay(100);
   byte y_output = get_finger(false);
 //  Serial.print(y_loop);
@@ -208,3 +247,4 @@ boolean key_check(byte _y_key){ //check whether current value is higher then pre
     return false;
   }
 }
+*/
