@@ -373,8 +373,9 @@ void setup(){
   pinMode(pin_button_2, INPUT_PULLUP);
 }
 void loop(){
- control.update();
- Serial.println(control.debug());
+  control.update();
+  Serial.println(control.debug());
+  delay(20);
   set_values();
 
   byte y_output = control.get_code();
