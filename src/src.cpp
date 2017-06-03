@@ -181,7 +181,9 @@ class sensor {
   }
 };
 
+vibe vm[3] = {vibe(pin_vib_1),vibe(pin_vib_2),vibe(pin_vib_3)};
 
+sensor sf[3] = {sensor(pin_flex_3,650,400,40),sensor(pin_flex_2,850,600,50),sensor(pin_flex_1,750,500,50)};
 
 vibe v1(pin_vib_1);
 vibe v2(pin_vib_2);
@@ -207,23 +209,23 @@ class controller{
     }
   }
   void update(){
-    v1.update();
-    v2.update();
-    v3.update();
-    s1.update();
-    s2.update();
-    s3.update();
-    f_v[0] = s1.get_val();
-    f_v[1] = s2.get_val();
-    f_v[2] = s3.get_val();
+    vm[0].update();
+    vm[1].update();
+    vm[2].update();
+    sf[0].update();
+    sf[1].update();
+    sf[2].update();
+    f_v[0] = sf[0].get_val();
+    f_v[1] = sf[1].get_val();
+    f_v[2] = sf[2].get_val();
     switch (f_v[0]){
       case 1:
         if (!f_vib_1[0])
-        if (v1.buzz(100, 128, 2, 50)) f_vib_1[0] = true;
+        if (vm[0].buzz(100, 128, 2, 50)) f_vib_1[0] = true;
         break;
       case 2:
         if (!f_vib_2[0])
-        if (v1.buzz(150, 255, 2, 50)) f_vib_2[0] = true;
+        if (vm[0].buzz(150, 255, 2, 50)) f_vib_2[0] = true;
         break;
       default:
       f_vib_1[0] = false;
@@ -233,11 +235,11 @@ class controller{
     switch (f_v[1]){
       case 1:
         if (!f_vib_1[1])
-        if (v2.buzz(100, 128, 2, 50)) f_vib_1[1] = true;
+        if (vm[1].buzz(100, 128, 2, 50)) f_vib_1[1] = true;
         break;
       case 2:
         if (!f_vib_2[2])
-        if (v2.buzz(150, 255, 2, 50)) f_vib_2[1] = true;
+        if (vm[1].buzz(150, 255, 2, 50)) f_vib_2[1] = true;
         break;
       default:
       f_vib_1[1] = false;
@@ -247,11 +249,11 @@ class controller{
     switch (f_v[2]){
       case 1:
         if (!f_vib_1[2])
-        if (v3.buzz(100, 128, 2, 50)) f_vib_1[2] = true;
+        if (vm[2].buzz(100, 128, 2, 50)) f_vib_1[2] = true;
         break;
       case 2:
         if (!f_vib_2[2])
-        if (v3.buzz(150, 255, 2, 50)) f_vib_2[2] = true;
+        if (vm[2].buzz(150, 255, 2, 50)) f_vib_2[2] = true;
         break;
       default:
       f_vib_1[2] = false;
@@ -261,6 +263,21 @@ class controller{
   }
   int get_code(){
     return (f_v[0]+(f_v[1]*3)+(f_v[2]*9));
+  }
+  String debug(){
+    String dbg;
+    String data[3];
+    for (int i=0;i<3;i++){
+      data[i] = "sensor" + String(i) + "[";
+      data[i] += "av_val: " + String(sf[i].get_av()) + " ";
+      data[i] += "ex_val: " + String(sf[i].get_exact()) + " ";
+      data[i] += "code_val: " + String(sf[i].get_val()) + " ";
+      data[i] += "1st_thr: " + String(sf[i].thresholds[0]) + " ";
+      data[i] += "2nd_thr: " + String(sf[i].thresholds[1]) + " ";
+      data[i] += "] ";
+    }
+    dbg = data[0] + data[1] + data[2];
+    return dbg;
   }
 };
 
@@ -275,12 +292,12 @@ void set_values(){
     } else {
       if (millis() - b1_start > 3000){
         b1_press = false;
-        v1.buzz(300, 255, 3, 50);
-        v2.buzz(300, 255, 3, 50);
-        v3.buzz(300, 255, 3, 50);
-        s1.set_threshold((int)s1.get_val(),0);
-        s2.set_threshold((int)s2.get_val(),0);
-        s3.set_threshold((int)s3.get_val(),0);
+        vm[0].buzz(300, 255, 3, 50);
+        vm[1].buzz(300, 255, 3, 50);
+        vm[2].buzz(300, 255, 3, 50);
+        sf[0].set_threshold((int)sf[0].get_av(),0);
+        sf[1].set_threshold((int)sf[1].get_av(),0);
+        sf[2].set_threshold((int)sf[2].get_av(),0);
       }
     }
   } else b1_press = false;
@@ -291,12 +308,12 @@ void set_values(){
     } else {
       if (millis() - b2_start > 3000){
         b2_press = false;
-        v1.buzz(300, 255, 3, 50);
-        v2.buzz(300, 255, 3, 50);
-        v3.buzz(300, 255, 3, 50);
-        s1.set_threshold((int)s1.get_val(),1);
-        s2.set_threshold((int)s2.get_val(),1);
-        s3.set_threshold((int)s3.get_val(),1);
+        vm[0].buzz(300, 255, 3, 50);
+        vm[1].buzz(300, 255, 3, 50);
+        vm[2].buzz(300, 255, 3, 50);
+        sf[0].set_threshold((int)sf[0].get_av(),1);
+        sf[1].set_threshold((int)sf[1].get_av(),1);
+        sf[2].set_threshold((int)sf[2].get_av(),1);
       }
     }
   } else b2_press = false;
@@ -307,12 +324,12 @@ void set_values(){
     } else {
       if (millis() - bb_start > 3000){
         b1_press = false;
-        v1.buzz(300, 255, 3, 50);
-        v2.buzz(300, 255, 3, 50);
-        v3.buzz(300, 255, 3, 50);
-        s1.set_threshold((int)s1.get_val(),2);
-        s2.set_threshold((int)s2.get_val(),2);
-        s3.set_threshold((int)s3.get_val(),2);
+        vm[0].buzz(300, 255, 3, 50);
+        vm[1].buzz(300, 255, 3, 50);
+        vm[2].buzz(300, 255, 3, 50);
+        sf[0].set_threshold((int)sf[0].get_av(),2);
+        sf[1].set_threshold((int)sf[1].get_av(),2);
+        sf[2].set_threshold((int)sf[2].get_av(),2);
       }
     }
   } else bb_press = false;
@@ -357,26 +374,7 @@ void setup(){
 }
 void loop(){
  control.update();
- Serial.print(control.get_code());
- Serial.print(" ");
- Serial.print(digitalRead(pin_button_1));
- Serial.print(" ");
- Serial.print(digitalRead(pin_button_2));
- Serial.print(" ");
-
-  delay(50);
-  Serial.print(s1.get_av());
-  Serial.print(" ");
-  Serial.print(s1.get_val());
-  Serial.print(" ");
-  Serial.print(s2.get_av());
-  Serial.print(" ");
-  Serial.print(s2.get_val());
-  Serial.print(" ");
-  Serial.print(s3.get_av());
-  Serial.print(" ");
-  Serial.print(s3.get_val());
-  Serial.println(" ");
+ Serial.println(control.debug());
   set_values();
 
   byte y_output = control.get_code();
@@ -397,7 +395,7 @@ void loop(){
     Serial.println(i_send);
     b_send = false;
     b_zero = false;
-    v1.buzz(50, 255, 3, 50);
+    vm[0].buzz(50, 255, 3, 50);
     if (i_send == 30){
       c_send = "\\b";
     } else {
